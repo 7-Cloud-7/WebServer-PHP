@@ -50,6 +50,6 @@ Para comprobar que el soporte de PHP funciona añadiremos un archivo llamado inf
 phpinfo();
 ?>
 ~~~
-Y comprobaremos que podemos acceder a é3l
+Y comprobaremos que podemos acceder a él
 
 ![alt text](https://github.com/Igonzalezvila/Proyecto1/blob/main/Images/infoPHP.png?raw=true)
