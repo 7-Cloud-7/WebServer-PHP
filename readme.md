@@ -12,7 +12,7 @@ services:
     container_name: asir-apache
 ~~~
 
-### Configurar puertos y volumenes
+### Mapear puertos y volumenes
 
 Añadiremos al archivo docker-compose.yml los siguientes datos para mapear los volumenes y añadir el puerto. Usaremos el volumen confApache para extraer los archivos de configuración que usaremos más tarde
 ~~~
@@ -40,3 +40,16 @@ echo "Hola mundo"
 ?>
 ~~~
 ![alt text](https://github.com/Igonzalezvila/Proyecto1/blob/main/Images/Screenshot%20from%202022-11-03%2016-18-16.png)
+
+## Comprobacion del módulo PHP
+
+Para comprobar que el soporte de PHP funciona añadiremos un archivo llamado info.php con el siguiente código:
+
+~~~
+<?php
+phpinfo();
+?>
+~~~
+Y comprobaremos que podemos acceder a é3l
+
+![alt text](https://github.com/Igonzalezvila/Proyecto1/blob/main/Images/infoPHP.png?raw=true)
