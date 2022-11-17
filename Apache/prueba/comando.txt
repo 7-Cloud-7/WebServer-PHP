@@ -1,0 +1,1 @@
+docker cp b701ee7de19dce17626d1b51b999fc583269cd0db67529748cbdfe3d3bbb5ab0:/etc/apache2 /home/asir2a/Escritorio/SRI/Proyecto1/Apache/prueba/
