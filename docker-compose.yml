@@ -9,10 +9,10 @@ services:
     ports:
     - '80:80'
     - '8000:8000'
+    - '443:443'
     volumes:
       - /home/asir2a/Escritorio/SRI/Proyecto1/Apache:/var/www/html/
       - /home/asir2a/Escritorio/SRI/Proyecto1/Apache/confApache:/etc/apache2
-      - /home/asir2a/Escritorio/SRI/Proyecto1/Apache/confhttpdconfhttpd:/etc/httpd/conf
 
   asir_cliente_proyect:
     container_name: asir_cliente_proyect
@@ -26,6 +26,19 @@ services:
     dns:
       - 10.0.1.10 #ip del contenedor DNS
 
+  firefox:
+    image: jlesage/firefox
+    container_name: asir_firefox
+    ports:
+      - 5800:5800
+    volumes:
+      - ./firefox:/config:rw
+    dns:
+      - 10.0.1.10
+    networks:
+      proyect1_subnet:
+        ipv4_address: 10.0.1.13
+
   proyectDNS:
     image: internetsystemsconsortium/bind9:9.16
     container_name: asir_proyectDNS
@@ -38,7 +51,25 @@ services:
     volumes:
       - /home/asir2a/Escritorio/SRI/Proyecto1/DNS/conf:/etc/bind
       - /home/asir2a/Escritorio/SRI/Proyecto1/DNS/zonas:/var/lib/bind
-networks:
-    proyect1_subnet:
-      external: true
 
+
+  wireshark:
+    image: lscr.io/linuxserver/wireshark:latest
+    container_name: wireshark
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - /path/to/config:/config
+    ports:
+      - 3000:3000 #optional
+    restart: unless-stopped
+
+networks:
+  proyect1_subnet:
+    external: true

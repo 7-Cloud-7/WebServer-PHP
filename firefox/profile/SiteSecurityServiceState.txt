@@ -1,0 +1,5 @@
+services.addons.mozilla.org:HSTS	0	19313	1700236163930,1,0,2
+incoming.telemetry.mozilla.org:HSTS	1	19319	1700760792788,1,0,2
+contile.services.mozilla.com:HSTS	1	19319	1700761154261,1,0,2
+aus5.mozilla.org:HSTS	0	19313	1700236164177,1,0,2
+firefox.settings.services.mozilla.com:HSTS	0	19313	1700236316128,1,0,2

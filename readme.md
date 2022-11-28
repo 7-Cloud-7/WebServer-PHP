@@ -2,6 +2,8 @@
 
  En el siguiente link (https://hub.docker.com/_/php) tenemos toda la informacion sobre las imágenes de PHP incluyendo un Apache con soporte para PHP, php:7.2-apache, que será la que usaremos.
 
+<br>
+
  ## Archivo docker-compose.yml
 
 Usaremos la imagen de apache "php:7.4-apache".
@@ -13,7 +15,24 @@ services:
     container_name: asir-apache
 ~~~
 
+<br>
+
 ### Mapear puertos y volumenes
+
+Primero en el archivo de configuracion ports.conf añadiremos los puertos que vayamos a usar en cada caso, cada vez que añadamos un contenedor con puertos mapeados hay que añadirlos a este archivo también
+
+~~~
+Listen 80
+Listen 8000
+
+<IfModule ssl_module>
+	Listen 443
+</IfModule>
+
+<IfModule mod_gnutls.c>
+	Listen 443
+</IfModule>
+~~~
 
 Añadiremos al archivo docker-compose.yml los siguientes datos para mapear los volumenes y añadir el puerto. Usaremos el volumen confApache para extraer los archivos de configuración que usaremos más tarde
 ~~~
@@ -23,13 +42,15 @@ services:
     image: php:7.4-apache
     container_name: asir-apache
     ports:
-    - '8001:80'
+    - '8000:80'
     volumes:
       - /home/asir2a/Escritorio/SRI/Proyecto1/Apache:/var/www/html/
       - confApache:/etc/apache2
 volumes:
   confApache:
 ~~~
+
+<br>
 
 ## Copiar la configuración de confApache
 
@@ -42,11 +63,13 @@ services:
     image: php:7.4-apache
     container_name: asir-apache
     ports:
-    - '8001:80'
+    - '8000:80'
     volumes:
       - /home/asir2a/Escritorio/SRI/Proyecto1/Apache:/var/www/html/
       - /home/asir2a/Escritorio/SRI/Proyecto1/Apache/confApache:/etc/apache2
 ~~~
+
+<br>
 
 ## Añadir un html a Apache
 
@@ -58,6 +81,8 @@ echo "Hola mundo"
 ?>
 ~~~
 ![alt text](https://github.com/Igonzalezvila/Proyecto1/blob/main/Images/Screenshot%20from%202022-11-03%2016-18-16.png)
+
+<br>
 
 ## Comprobacion del módulo PHP
 
@@ -72,6 +97,8 @@ Y comprobaremos que podemos acceder a él
 
 ![alt text](https://github.com/Igonzalezvila/Proyecto1/blob/main/Images/infoPHP.png?raw=true)
 
+
+<br>
 
 ## Añadir un DNS
 
@@ -100,6 +127,8 @@ services:
       - /home/asir2a/Escritorio/SRI/Proyecto1/DNS/conf:/etc/bind
       - /home/asir2a/Escritorio/SRI/Proyecto1/DNS/zonas:/var/lib/bind
 ~~~
+
+<br>
 
 ## Añadir IPs fijas
 
@@ -137,9 +166,13 @@ networks:
       external: true
 ~~~
 
+<br>
+
 ## Resolución de dominios
 
 Para asignar el nombre de dominio a la IP y carpeta crearemos y editaremos los archivos de configuracion del DNS:
+
+<br>
 
 ### Archivo named.conf
 Ruta: /home/asir2a/Escritorio/SRI/Proyecto1/DNS/conf
@@ -160,6 +193,8 @@ zone "fabulas.com." {
         notify explicit;
 };
 ~~~
+
+<br>
 
 ### Archivo db.fabulas.com
 Ruta: /home/asir2a/Escritorio/SRI/Proyecto1/DNS/zonas
@@ -186,6 +221,8 @@ pop     IN      CNAME   ns
 www     IN      CNAME   etch
 mail    IN      CNAME   etch
 ~~~
+
+<br>
 
 ## Añadir un cliente y enlzarlo al servidor DNS
 
@@ -237,4 +274,99 @@ networks:
       external: true
 ~~~
 
-Con esto el cliente podra acceder a los archivos del servidor apache mediante los nombres de dominio oscuras.fabulas.com y maravillosas.fabulas.com
+Con esto el cliente podrá acceder a los archivos del servidor apache mediante los nombres de dominio oscuras.fabulas.com y maravillosas.fabulas.com
+
+<br>
+
+## Configurar DirectoryIndex
+
+Por norma general esta directiva se puede configurar en el archivo apache2.conf pero también está incluida en el archivo dir.conf dentro de la carpeta "mods-avaliable".
+
+Para evitar problemas de orden configuraremos la directiva en ambos archivos de la siguiente forma por ejemplo:
+
+~~~
+<IfModule mod_dir.c>
+	DirectoryIndex hola2.html hola.html
+</IfModule>
+~~~
+
+El orden será de izquierda a derecha. En este ejemplo el archivo "hola2.html" se mostrará antes que "hola.html"
+
+<br>
+
+## Habilitar HTTPS (SSL)
+
+
+
+Primero iremos a los archivos de configuración que habiamos copiado del contanedor y buscaremos el archivo "default-ssl.conf" en la carpeta "/confApache/sites-avaliable" y lo copiaremos en la carpeta "/confApache/sites-enabled". Con esto tendremos un nuevo sitio listo para habilitar con HTTPS, ahora habra que habilitarlo.
+
+Abrimos una terminal en el contenedor del apache2 y usamos el comando "a2enmod ssl", vienen significando "apache2 enable mod ssl" y luego el comando "a2enmod rewrite". Si da algún error con archivos de la carperta "mods-avaliable" podemos borrarlos sin más.
+
+Lo siguiente será editar el archivo apache2.conf y añadir las siguientes lineas:
+~~~
+<Directory /var/www/html>
+AllowOverride All
+</Directory>
+~~~
+
+Ahora hay que crear los certificados SSL para poder trabajar con ellos así que crearemos una carpeta dentro de la carpeta "confApache" y la llamaremos por ejemplo "certificate".
+
+Una vez creada abriremos una terminal en esta carpeta y usaremos el comando:
+
+~~~
+openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out apache-certificate.crt -keyout apache.key
+~~~
+
+Este comando creara los archivos de certificado que necesitamos y tendremos que añadir la información que nos pide. Lo siguiente será editar el archivo "default-ssl.conf" que tenemos en la carpeta "sites-enabled" y añadiremos las rutas de los archvivos de certificado y descomentaremos la linea "SSLEngine on" en caso de que esté comentada.
+~~~
+<VirtualHost *:443>
+        SSLEngine on
+        SSLCertificateFile /etc/apache2/certificate/apache-certificate.crt
+        SSLCertificateKeyFile /etc/apache2/certificate/apache.key
+</VirtualHost>
+~~~
+
+Después reiniciaremos el servicio de pache2 con este comando:
+
+~~~
+service apache2 restart
+~~~
+
+Y por último mapearemos el puerto 433 en nuestro archivo "docker-compose.yml" con el resto de puertos ya mapeados.
+~~~
+    ports:
+    - '80:80'
+    - '8000:8000'
+    - '443:443'
+~~~
+
+Como hemos editado el archivo docker-compose.yml deberemos usar los comandos "docker-compese down" y "docker-compese up" para reiniciar el sistema y listo.
+
+Con ésto ya podremos acceder a nuestro sitio buscando en el navegador "https://localhost:443"
+
+<br>
+
+## Wireshark en docker
+
+Es bastante simple, solo hay que añadir al archivo "docker-compose.yml" las siguientes lineas que podemos encontar en la propia pagina oficial de la imagen:
+
+~~~
+  wireshark:
+    image: lscr.io/linuxserver/wireshark:latest
+    container_name: wireshark
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - /path/to/config:/config
+    ports:
+      - 3000:3000 #optional
+    restart: unless-stopped
+~~~
+
+Para acceder a él entraremos en el navegador y buscaremos "localhost:3000" y esperamos a que cargue, no necesita nada más.

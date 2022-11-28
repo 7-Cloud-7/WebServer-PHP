@@ -1,0 +1,13 @@
+[Default Applications]
+x-scheme-handler/http=userapp-Firefox-X41MV1.desktop
+x-scheme-handler/https=userapp-Firefox-X41MV1.desktop
+x-scheme-handler/chrome=userapp-Firefox-X41MV1.desktop
+text/html=userapp-Firefox-X41MV1.desktop
+application/x-extension-htm=userapp-Firefox-X41MV1.desktop
+application/x-extension-html=userapp-Firefox-X41MV1.desktop
+application/x-extension-shtml=userapp-Firefox-X41MV1.desktop
+application/xhtml+xml=userapp-Firefox-X41MV1.desktop
+application/x-extension-xhtml=userapp-Firefox-X41MV1.desktop
+application/x-extension-xht=userapp-Firefox-X41MV1.desktop
+
+[Added Associations]
